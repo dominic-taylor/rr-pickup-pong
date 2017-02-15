@@ -1,0 +1,28 @@
+{
+  "name": "pickup-pong",
+  "version": "1.0.0",
+  "description": "multiplayer pong over sockets",
+  "main": "index.js",
+  "dependencies": {
+    "browserify": "^14.1.0",
+    "express": "^4.14.1",
+    "socket.io": "^1.7.2",
+    "watchify": "^3.9.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify public/client.js -o public/bundle.js",
+    "watch": "watchify public/client.js -o public/bundle.js -dv"  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dominic-taylor/pickup-pong.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dominic-taylor/pickup-pong/issues"
+  },
+  "homepage": "https://github.com/dominic-taylor/pickup-pong#readme"
+}
