@@ -35,11 +35,6 @@ function reqGame(e) {
 }
 
 
-socket.on('startGame', function (data) {
-  log('Game between '+data.playerOne+' and '+ data.playerTwo+'is on!' );
-  
-  console.log(data);
-})
 
 socket.on('message', function (message) {
   log(message)
@@ -60,9 +55,27 @@ socket.on('challenge', function (challenge) {
   lobby.insertBefore(accept,lobby.childNodes[1])
 
   log('Challenge from '+ challenge.challenger+'. Ready?')
-  // UPTO: Ask if they accept//are ready
-  // if yes
-  //   send server message to tell both clients to ready the game socket.emit('readyGame',
-//          ({gameId, challenger, thisPlayer})
+})
+
+socket.on('startGame', function (data) {
+  log('Game between '+data.playerOne+' and '+ data.playerTwo+'is on!' );
+  paintGame()
+  console.log(data);
 
 })
+
+function paintGame() {
+  console.log('painting');
+  var canvas = document.createElement('canvas');
+  canvas.id = canvas
+  document.getElementById('game').appendChild(canvas);
+  var game = new Game()
+}
+
+function Game() {
+    var canvas = document.getElementById("canvas");
+    this.width = canvas.width;
+    this.height = canvas.height;
+    this.context = canvas.getContext("2d");
+    this.context.fillStyle = "white";
+}

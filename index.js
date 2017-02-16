@@ -16,9 +16,11 @@ let gameCollection = []
 
 function validate(name){
   for (var i = 0; i < users.length; i++) {
+    console.log(name);
+    console.log(users[i].name);
     if(name == users[i].name){
       var randString = Math.floor(Math.random() * (1000 - 2 + 1)) + 2
-      name+' '+ randString
+      name = name+' '+ randString
     }
   }
   return name
@@ -72,8 +74,6 @@ io.sockets.on('connection', function(socket) {
 
     socket.join(game.id)
     io.in(game.id).emit('startGame', game)
-
-    // send message to game room. game starting.
   })
 
   socket.on('disconnect', function() {
@@ -85,16 +85,6 @@ io.sockets.on('connection', function(socket) {
 	})
 
 })//io.connected
-
- //
- // on connected
- //    validate name
- //    add socket to users[]
- //
- //    send back available games data
-
-
-
 
 http.listen(process.env.PORT || 3000, function() {
   console.log('listening on port ' + (process.env.PORT || 3000));
