@@ -19,12 +19,16 @@ socket.on('resJoinLobby', function (data) {
 socket.on('resUsers', function (users) {
   let gameList = document.getElementById('gameList')
   gameList.innerHTML = ''
+  let thisUser = document.getElementById('userName').innerHTML
+  console.log(thisUser);
   for (var i = 0; i < users.length; i++) {
-    var liNode = document.createElement("LI")
-    var game = document.createTextNode(users[i].name)
-    liNode.appendChild(game)
-    liNode.addEventListener('click', reqGame, false)
-    gameList.appendChild(liNode)
+    if(users[i].name != thisUser){
+      var liNode = document.createElement("LI")
+      var game = document.createTextNode(users[i].name)
+      liNode.appendChild(game)
+      liNode.addEventListener('click', reqGame, false)
+      gameList.appendChild(liNode)
+    }
   }
 })
 
@@ -59,17 +63,25 @@ socket.on('challenge', function (challenge) {
 
 socket.on('startGame', function (data) {
   log('Game between '+data.playerOne+' and '+ data.playerTwo+'is on!' );
-  paintGame()
+  startGame()
   console.log(data);
 
 })
 
-function paintGame() {
-  console.log('painting');
+function startGame() {
   var canvas = document.createElement('canvas');
-  canvas.id = canvas
+  canvas.id = 'canvas'
   document.getElementById('game').appendChild(canvas);
   var game = new Game()
+
+  MainLoop()
+}
+
+function MainLoop() {
+    game.update();
+    game.draw();
+    // Call the main loop again at a frame rate of 30fps
+    setTimeout(MainLoop, 33.3333);
 }
 
 function Game() {
@@ -79,3 +91,15 @@ function Game() {
     this.context = canvas.getContext("2d");
     this.context.fillStyle = "white";
 }
+
+Game.prototype.draw = function()
+{
+    this.context.clearRect(0, 0, this.width, this.height);
+    this.context.fillRect(this.width/2, 0, 2, this.height);
+};
+
+Game.prototype.update = function()
+{
+    if (this.paused)
+        return;
+};
