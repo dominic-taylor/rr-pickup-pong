@@ -61,10 +61,8 @@ socket.on('startGame', function (data) {
   if (readyButton) {
     readyButton.parentNode.removeChild(readyButton);
   }
-
+  socket.game = data
   log('Game between '+data.playerOne+' and '+ data.playerTwo+'is on!' );
-
-  console.log(data);
   startGame(data)
 })
 
@@ -72,35 +70,16 @@ function startGame(data) {
   var canvas = document.createElement('canvas');
   canvas.id = 'canvas'
   canvas.addEventListener('keypress', function(){
-    //if you press w or s send a socket.emit('move', signal)
-    //where signal is the gameId and opponents id and the w/s
-
-    //server
-    //on 'move'(signal)
-    //  take the signal data and
-    //  send it to the opponent/both players(room)
-    //
-
-    //in the room
-    // have gotMove(signal)
-    //   moveHandler(signal)
-    //   pass the signal to the Game() and update
-    //
-    //
-
   })
   document.getElementById('game').appendChild(canvas);
   gameRoutine()
 
 }
 
-
 function gameRoutine() {
+  let playerTwoMove
   var game = new Game() // creating instance of Game obj
-  console.log(game);
    //calls loop()
-
-
 
   function MainLoop() {
       game.update();  //calls the instances update and draw()
@@ -115,6 +94,7 @@ function gameRoutine() {
       this.height = canvas.height;
       this.context = canvas.getContext("2d");
       this.context.fillStyle = "white";
+      this.keys = new KeyListener();
 
       this.p1 = new Paddle(5, 0);
       this.p1.y = this.height/2 - this.p1.height/2;
@@ -135,7 +115,63 @@ function gameRoutine() {
   {
       if (this.paused)
           return;
+
+    if (this.keys.isPressed(83)) { // DOWN
+        this.p1.y = Math.min(this.height - this.p1.height, this.p1.y + 4);
+    } else if (this.keys.isPressed(87)) { // UP
+        this.p1.y = Math.max(0, this.p1.y - 4);
+    }
+
+    //send this.p1.y to server
+    let gameData = {
+                id: socket.game.id,
+                move: this.p1.y
+              }
+
+    socket.emit('sendMove', gameData)
+
+      // recive opponents this.p1.y and apply to this.p2.y
+    socket.on('getMove', function (data) {
+      //how do I get this out of here?
+      playerTwoMove =  data.move
+    })
+    this.p2.y = playerTwoMove
+
+
+    // if (this.keys.isPressed(40)) { // DOWN
+    //     this.p2.y = Math.min(this.height - this.p2.height, this.p2.y + 4);
+    // } else if (this.keys.isPressed(38)) { // UP
+    //     this.p2.y = Math.max(0, this.p2.y - 4);
+    // }
   };
+
+  function KeyListener() {
+    this.pressedKeys = [];
+
+    this.keydown = function(e) {
+        this.pressedKeys[e.keyCode] = true;
+    };
+
+    this.keyup = function(e) {
+        this.pressedKeys[e.keyCode] = false;
+    };
+
+    document.addEventListener("keydown", this.keydown.bind(this));
+    document.addEventListener("keyup", this.keyup.bind(this));
+}
+
+KeyListener.prototype.isPressed = function(key)
+{
+    return this.pressedKeys[key] ? true : false;
+};
+
+KeyListener.prototype.addKeyPressListener = function(keyCode, callback)
+{
+    document.addEventListener("keypress", function(e) {
+        if (e.keyCode == keyCode)
+            callback(e);
+    });
+};
   function Paddle(x,y) {
     this.x = x;
     this.y = y;

@@ -56,7 +56,6 @@ io.sockets.on('connection', function(socket) {
   })
 
   socket.on('readyGame', function (data) {
-
     let game = {}
     game.id = data.gameId
     game.playerOne = data.host
@@ -74,6 +73,12 @@ io.sockets.on('connection', function(socket) {
 
     socket.join(game.id)
     io.in(game.id).emit('startGame', game)
+  })
+
+  socket.on('sendMove', function (gameData) {
+    console.log(gameData);
+    socket.broadcast.to(gameData.id).emit('getMove',gameData);
+
   })
 
   socket.on('disconnect', function() {
