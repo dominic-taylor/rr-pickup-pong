@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta content="IE=edge" http-equiv="X-UA-Compatible">
+	<meta content="width=device-width, initial-scale=1" name="viewport">
+	<title>Glowing Train</title>
+  <link href="https://fonts.googleapis.com/css?family=Hind" rel="stylesheet">
+	<link href="./main.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+  <div class="container">
+    <div class="title">
+      <h1>Glowing Train</h1>
+      <input class="" id="nameInput" type="text" maxlength="25" autofocus=""/>
+      <button id="joinServer">Enter The server</button>
+    </div>
+    <h2 id="userName"></h2>
+    <div id="lobby">
+        <h2 id="gameMessages">Open Games</h2>
+        <div id="game">
+        </div>
+        <ul id="gameList"></ul>
+    </div>
+  </div>
+</body>
+<script src="/socket.io/socket.io.js">
+</script>
+<script src="/bundle.js">
+</script>
+</html>
