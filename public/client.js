@@ -39,7 +39,9 @@ socket.on('message', function (message) {
 })
 
 function log(message) {
-  document.getElementById('gameMessages').innerHTML = message
+  let li = document.createElement('LI')
+  li.appendChild(document.createTextNode(message))
+  document.getElementById('gameMessages').appendChild(li)
 }
 
 socket.on('challenge', function (challenge) {
@@ -69,121 +71,56 @@ socket.on('startGame', function (data) {
 function startGame(data) {
   var canvas = document.createElement('canvas');
   canvas.id = 'canvas'
-  canvas.addEventListener('keypress', function(){
-  })
+  
   document.getElementById('game').appendChild(canvas);
-  gameRoutine()
+  gameRoutine(canvas, data)
 
 }
 
-function gameRoutine() {
-  let playerTwoMove
-  var game = new Game() // creating instance of Game obj
-   //calls loop()
+function gameRoutine(board, gameData) {
+  // console.log('socket.game: '+JSON.stringify(socket.game))
+  let shapes = []
+  let ctx = board.getContext('2d')
+  let boardLeft = board.offsetLeft
+  let boardTop = board.offsetTop
 
-  function MainLoop() {
-      game.update();  //calls the instances update and draw()
-      game.draw();
-      // Call the main loop again at a frame rate of 30fps
-      setTimeout(MainLoop, 33.3333);
-  }
 
-  function Game() {
-      var canvas = document.getElementById("canvas");
-      this.width = canvas.width;
-      this.height = canvas.height;
-      this.context = canvas.getContext("2d");
-      this.context.fillStyle = "white";
-      this.keys = new KeyListener();
+  board.addEventListener('click', function(e){
+    var x = e.pageX - boardLeft
+    var y = e.pageY - boardTop
+    console.log(x, y)
+    // shapes.forEach(function (shape) {
+    if (y > 50 && y < 150  && x > 50 && x < 150) {
+      console.log('in the left shapre? ')
+      // if (y > shape.top && y < shape.top + shape.height && x > shape.left && x < shape.left + shape.width) {
+        // console.log('clicked a shape: '+ shape.name)  
+        // console.log('shape.top', shape.top)  
+        // console.log('shape.left', shape.left)  
+        
 
-      this.p1 = new Paddle(5, 0);
-      this.p1.y = this.height/2 - this.p1.height/2;
-      this.p2 = new Paddle(this.width - 5 - 2, 0);
-      this.p2.y = this.height/2 - this.p2.height/2;
-  }
-
-  Game.prototype.draw = function()
-  {
-      this.context.clearRect(0, 0, this.width, this.height);
-      this.context.fillRect(this.width/2, 0, 2, this.height);
-
-      this.p1.draw(this.context);
-      this.p2.draw(this.context);
-  };
-
-  Game.prototype.update = function()
-  {
-      if (this.paused)
-          return;
-
-    if (this.keys.isPressed(83)) { // DOWN
-        this.p1.y = Math.min(this.height - this.p1.height, this.p1.y + 4);
-    } else if (this.keys.isPressed(87)) { // UP
-        this.p1.y = Math.max(0, this.p1.y - 4);
-    }
-
-    //send this.p1.y to server
-    let gameData = {
-                id: socket.game.id,
-                move: this.p1.y
-              }
-
-    socket.emit('sendMove', gameData)
-
-      // recive opponents this.p1.y and apply to this.p2.y
-    socket.on('getMove', function (data) {
-      //how do I get this out of here?
-      playerTwoMove =  data.move
+      }
     })
-    this.p2.y = playerTwoMove
+  //}, false)
 
+  shapes.push({colour:'#05EFFF',width: 50,height: 50, top: 25, left: 25, name: 'Rock'})
+  shapes.push({colour: '#FFC300',width: 50,height: 50, top: 25, left: 175, name: 'Paper'})
+  shapes.push({colour: '#CEFF33',width: 50,height: 50, top: 75, left: 125, name: 'Scissors'});
+  
 
-    // if (this.keys.isPressed(40)) { // DOWN
-    //     this.p2.y = Math.min(this.height - this.p2.height, this.p2.y + 4);
-    // } else if (this.keys.isPressed(38)) { // UP
-    //     this.p2.y = Math.max(0, this.p2.y - 4);
-    // }
-  };
+  // ctx.font = "15px Arial";
+  // ctx.fillText("Paper",board.width/4, board.height/3);
+  // ctx.fillText("Rock",board.width - board.width/4, board.height/3);
+  // ctx.fillText("Scissors",board.width/2-30,125);
 
-  function KeyListener() {
-    this.pressedKeys = [];
+// Render elements.
+shapes.forEach(function(element) {
+    ctx.fillStyle = element.colour;
+    ctx.fillRect(element.left, element.top, element.width, element.height);
+});
+  //retain coords of game options. 
+  // if e.target.mouse coords are within a certain x/y of the options
+  // then that option ios chosen and that event is emmited. 
+ 
 
-    this.keydown = function(e) {
-        this.pressedKeys[e.keyCode] = true;
-    };
-
-    this.keyup = function(e) {
-        this.pressedKeys[e.keyCode] = false;
-    };
-
-    document.addEventListener("keydown", this.keydown.bind(this));
-    document.addEventListener("keyup", this.keyup.bind(this));
 }
 
-KeyListener.prototype.isPressed = function(key)
-{
-    return this.pressedKeys[key] ? true : false;
-};
-
-KeyListener.prototype.addKeyPressListener = function(keyCode, callback)
-{
-    document.addEventListener("keypress", function(e) {
-        if (e.keyCode == keyCode)
-            callback(e);
-    });
-};
-  function Paddle(x,y) {
-    this.x = x;
-    this.y = y;
-    this.width = 2;
-    this.height = 28;
-    this.score = 0;
-  }
-
-  Paddle.prototype.draw = function(p)
-  {
-      p.fillRect(this.x, this.y, this.width, this.height);
-  };
-
-  MainLoop()
-}
