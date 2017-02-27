@@ -40,8 +40,8 @@ ul, li {
   max-height: 100px;
 }
 canvas{
-  width: 600px;
-  height:300px;
+  width: 800px;
+  height:400px;
   background-color: #006994;
 }
 button {

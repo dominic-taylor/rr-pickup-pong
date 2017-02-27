@@ -72,7 +72,7 @@ function startGame(data) {
   var canvas = document.createElement('canvas');
   canvas.id = 'canvas'
   
-  document.getElementById('game').appendChild(canvas);
+  document.getElementById('lobby').appendChild(canvas);
   gameRoutine(canvas, data)
 
 }
@@ -84,43 +84,73 @@ function gameRoutine(board, gameData) {
   let boardLeft = board.offsetLeft
   let boardTop = board.offsetTop
 
+  document.addEventListener('keydown', function(e){
+      shapes.forEach(function (shape) {
+        if (gameData.playerOneId == socket.id) {
+            moveHandler(e, shapes[0])
+        }
+        if (gameData.playerTwoId == socket.id) {
+            moveHandler(e, shapes[1])
+        }
+      });
+  }, false)
+  //Top: distance from top of canvas
+  // Left: distance from left of canvas
+  // Height: Height in distcnce from Top
+  // Width: Width in distance from Left
 
-  board.addEventListener('click', function(e){
-    var x = e.pageX - boardLeft
-    var y = e.pageY - boardTop
-    console.log(x, y)
-    // shapes.forEach(function (shape) {
-    if (y > 50 && y < 150  && x > 50 && x < 150) {
-      console.log('in the left shapre? ')
-      // if (y > shape.top && y < shape.top + shape.height && x > shape.left && x < shape.left + shape.width) {
-        // console.log('clicked a shape: '+ shape.name)  
-        // console.log('shape.top', shape.top)  
-        // console.log('shape.left', shape.left)  
-        
 
-      }
-    })
-  //}, false)
-
-  shapes.push({colour:'#05EFFF',width: 50,height: 50, top: 25, left: 25, name: 'Rock'})
-  shapes.push({colour: '#FFC300',width: 50,height: 50, top: 25, left: 175, name: 'Paper'})
-  shapes.push({colour: '#CEFF33',width: 50,height: 50, top: 75, left: 125, name: 'Scissors'});
-  
-
-  // ctx.font = "15px Arial";
-  // ctx.fillText("Paper",board.width/4, board.height/3);
-  // ctx.fillText("Rock",board.width - board.width/4, board.height/3);
-  // ctx.fillText("Scissors",board.width/2-30,125);
+  shapes.push({colour:'#05EFFF',width: 50,height: 50, top: 25, left: 25, name: 'P1 Rock'})
+  shapes.push({colour: '#FFC300',width: 50,height: 50, top: 25, left: 175, name: 'P2 Paper'})
+  shapes.push({colour: '#CEFF33',width: 5,height: 5, top: 75, left: 125, name: 'Ball'});
+  draw(shapes)
 
 // Render elements.
-shapes.forEach(function(element) {
-    ctx.fillStyle = element.colour;
-    ctx.fillRect(element.left, element.top, element.width, element.height);
-});
-  //retain coords of game options. 
-  // if e.target.mouse coords are within a certain x/y of the options
-  // then that option ios chosen and that event is emmited. 
- 
+  function draw(gameObjects) {
+    //redraw canvas first 
+    ctx.clearRect(0, 0, 800, 400)
+
+    gameObjects.forEach(function(element) {
+      ctx.fillStyle = element.colour;
+      ctx.fillRect(element.left, element.top, element.width, element.height);
+    });
+  }
+
+  function moveHandler(press, player) {
+     if(press.key=='x' || press.code == 'keyX'){
+        player.top+= 5
+        // console.log(press.key +'  '+JSON.stringify(player))
+        // console.log(player+' pressed x')
+     }
+     if(press.key=='s' || press.code == 'keyS'){
+        player.top-= 5
+        // console.log(press.key +'  '+JSON.stringify(player))
+        // console.log(player+' pressed s')
+     }
+     
+     draw(shapes)
+     sendMove({id:gameData.id, movement: player.top})
+     // get press.key and player
+     // check what key was pressed
+     // if w or s
+     //    change code of that player shape
+     //    redraw
+     //    send to server
+
+  }
+
+  function sendMove(data) { 
+    socket.emit('sendMove', data)
+  }
+
+  socket.on('getMove', function (opponent) {
+    console.log(opponent)
+    if (gameData.playerOneId == socket.id) {
+      shapes[1].top = opponent.movement
+    }else{
+      shapes[0].top = opponent.movement
+    }
+    draw(shapes)
+  })
 
 }
-

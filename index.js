@@ -77,7 +77,7 @@ io.sockets.on('connection', function(socket) {
 
   socket.on('sendMove', function (gameData) {
     console.log(gameData);
-    socket.broadcast.to(gameData.id).emit('getMove',gameData);
+    socket.broadcast.to(gameData.id).emit('getMove', gameData);
 
   })
 
