@@ -87,7 +87,7 @@ function gameRoutine(board, gameData) {
   document.addEventListener('keydown', function(e){
       shapes.forEach(function (shape) {
         if (gameData.playerOneId == socket.id) {
-            moveHandler(e, shapes[0])
+             moveHandler(e, shapes[0])
         }
         if (gameData.playerTwoId == socket.id) {
             moveHandler(e, shapes[1])
@@ -98,7 +98,6 @@ function gameRoutine(board, gameData) {
   // Left: distance from left of canvas
   // Height: Height in distcnce from Top
   // Width: Width in distance from Left
-
 
   shapes.push({colour:'#05EFFF',width: 50,height: 50, top: 25, left: 25, name: 'P1 Rock'})
   shapes.push({colour: '#FFC300',width: 50,height: 50, top: 25, left: 175, name: 'P2 Paper'})
@@ -117,17 +116,25 @@ function gameRoutine(board, gameData) {
   }
 
   function moveHandler(press, player) {
-     if(press.key=='x' || press.code == 'keyX'){
+     
+
+     if(press.key=='x' || press.code == 'keyX'){// && player is not at top of canvas
         player.top+= 5
-        // console.log(press.key +'  '+JSON.stringify(player))
+         // console.log(press.key +'  '+JSON.stringify(player))
         // console.log(player+' pressed x')
      }
      if(press.key=='s' || press.code == 'keyS'){
         player.top-= 5
         // console.log(press.key +'  '+JSON.stringify(player))
         // console.log(player+' pressed s')
+   
      }
-     
+     if(player.top<=-5){
+        player.top = -5
+     } 
+     if(player.top>=100){
+        player.top = 100
+     }
      draw(shapes)
      sendMove({id:gameData.id, movement: player.top})
      // get press.key and player
