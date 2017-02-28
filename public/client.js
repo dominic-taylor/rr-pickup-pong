@@ -99,7 +99,7 @@ function gameRoutine(board, gameData) {
 
  let p1 = {colour:'#05EFFF',width: 10,height: 60, y: board.height/2, x: 10, dx: 0, dy: 0,name: 'P1 Rock'}
  let p2 = {colour: '#FFC300',width: 10,height: 60, y: board.height/2, x: board.width-20, dx: 0, dy: 0, name: 'P2 Paper'}
- let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 1, dy: -1, name: 'Ball'};
+ let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 2, dy: -2, name: 'Ball'};
  setInterval(draw, 10)
 // Render elements.
   function draw() {
@@ -109,27 +109,9 @@ function gameRoutine(board, gameData) {
     drawPaddle(p1)
     drawPaddle(p2)
   }
-   // if(element.name == 'Ball'){
-   //    if(element.y > board.height || element.y < 0){
-   //       element.dy = -element.dy
-   //    }
-   //  //   if((shapes[0].x == element.y && shapes[0].y == element.y) || (shapes[1].x == element.y && shapes[1].y == element.y)) 
-   //  //       // element.dy = -element.dy;
-   //  //       element.dx = -element.dx;      
-   //  //      console.log(element.dx+ ' '+element.dy+ '  ==  '+shapes[0].x+ ''+ shapes[0].y)
-    // }
-    //   element.y += element.dy
-    //   element.x += element.dx
-    //   ctx.fillStyle = element.colour;
-    //   ctx.fillRect(element.x, element.y, element.width, element.height);
- 
-    // }
-
-
   function drawBall() {
-      console.log('ball: x'+ball.y + ' y'+ball.x)
-      console.log('p2.x:'+p2.x+' y: '+p2.y)    
-      let tolerance = 5
+      console.log(p2)
+      let diff = 5
 
       if(ball.x > board.width || ball.x < 0){
         ball.x = board.width/2
@@ -139,11 +121,23 @@ function gameRoutine(board, gameData) {
       if(ball.y > board.height || ball.y < 0){
         ball.dy = -ball.dy
       }
-      if(p1.x == ball.x && p1.y == ball.y || p2.x == ball.x && p2.y == ball.y) {
-        // dy = -dy;
-        ball.dx = -ball.dx;      
-        console.log(ball.dx+ ' '+ball.dy)
+
+   
+      if(ball.x+ball.width/2 > p1.x +p2.width
+        && ball.x < p1.x+p1.width 
+        && ball.y+ball.height>p1.y 
+        && ball.y<p1.y+p1.height){
+        ball.dx = -ball.dx;
+        console.log('ball: x'+ball.y + ' y'+ball.x)
+        console.log('p2.x:'+p1.x+' y: '+p1.y) 
       }
+
+      if(ball.x+ball.width/2 > p2.x && ball.x < p2.x+p2.width && ball.y+ball.height>p2.y && ball.y<p2.y+p2.height){
+        console.log('ball: x'+ball.y + ' y'+ball.x)
+        console.log('p2.x:'+p2.x+' y: '+p2.y)  
+        ball.dx = -ball.dx     
+       }
+
       ball.y += ball.dy
       ball.x += ball.dx
       ctx.fillStyle = ball.colour;
@@ -157,7 +151,7 @@ function gameRoutine(board, gameData) {
 
 
   function moveHandler(press, player) {
-     if(press.key=='x' || press.code == 'keyX'){// && player is not at y of canvas
+     if(press.key=='x' || press.code == 'keyX'){
         player.y+= 20
          // console.log(press.key +'  '+JSON.stringify(player))
         // console.log(player+' pressed x')
@@ -196,7 +190,7 @@ function gameRoutine(board, gameData) {
     }else{
       p1.y = opponent.movement
     }
-    draw(shapes)
+    //draw(shapes)
   })
 
 }
