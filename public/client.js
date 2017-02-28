@@ -71,6 +71,8 @@ socket.on('startGame', function (data) {
 function startGame(data) {
   var canvas = document.createElement('canvas');
   canvas.id = 'canvas'
+  canvas.width = 600
+  canvas.height = 300
   
   document.getElementById('lobby').appendChild(canvas);
   gameRoutine(canvas, data)
@@ -81,62 +83,89 @@ function gameRoutine(board, gameData) {
   // console.log('socket.game: '+JSON.stringify(socket.game))
   let shapes = []
   let ctx = board.getContext('2d')
-  let boardLeft = board.offsetLeft
-  let boardTop = board.offsetTop
-
+ 
   document.addEventListener('keydown', function(e){
-      shapes.forEach(function (shape) {
         if (gameData.playerOneId == socket.id) {
-             moveHandler(e, shapes[0])
+             moveHandler(e, p1)
         }
         if (gameData.playerTwoId == socket.id) {
-            moveHandler(e, shapes[1])
+            moveHandler(e, p2)
         }
-      });
   }, false)
   //Top: distance from top of canvas
-  // Left: distance from left of canvas
+  // x: distance from x of canvas
   // Height: Height in distcnce from Top
-  // Width: Width in distance from Left
+  // Width: Width in distance from x
 
-  shapes.push({colour:'#05EFFF',width: 50,height: 50, top: 25, left: 25, name: 'P1 Rock'})
-  shapes.push({colour: '#FFC300',width: 50,height: 50, top: 25, left: 175, name: 'P2 Paper'})
-  shapes.push({colour: '#CEFF33',width: 5,height: 5, top: 75, left: 125, name: 'Ball'});
-  draw(shapes)
-
+ let p1 = {colour:'#05EFFF',width: 10,height: 60, y: board.height/2, x: 10, dx: 0, dy: 0,name: 'P1 Rock'}
+ let p2 = {colour: '#FFC300',width: 10,height: 60, y: board.height/2, x: board.width-20, dx: 0, dy: 0, name: 'P2 Paper'}
+ let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 1, dy: -1, name: 'Ball'};
+ setInterval(draw, 10)
 // Render elements.
-  function draw(gameObjects) {
+  function draw() {
     //redraw canvas first 
-    ctx.clearRect(0, 0, 800, 400)
+    ctx.clearRect(0, 0, 600, 300)
+    drawBall()
+    drawPaddle(p1)
+    drawPaddle(p2)
+  }
+   // if(element.name == 'Ball'){
+   //    if(element.y > board.height || element.y < 0){
+   //       element.dy = -element.dy
+   //    }
+   //  //   if((shapes[0].x == element.y && shapes[0].y == element.y) || (shapes[1].x == element.y && shapes[1].y == element.y)) 
+   //  //       // element.dy = -element.dy;
+   //  //       element.dx = -element.dx;      
+   //  //      console.log(element.dx+ ' '+element.dy+ '  ==  '+shapes[0].x+ ''+ shapes[0].y)
+    // }
+    //   element.y += element.dy
+    //   element.x += element.dx
+    //   ctx.fillStyle = element.colour;
+    //   ctx.fillRect(element.x, element.y, element.width, element.height);
+ 
+    // }
 
-    gameObjects.forEach(function(element) {
-      ctx.fillStyle = element.colour;
-      ctx.fillRect(element.left, element.top, element.width, element.height);
-    });
+
+  function drawBall() {    
+      if(ball.y > board.height || ball.y < 0){
+        ball.dy = -ball.dy
+      }
+          //   if((shapes[0].x == y && shapes[0].y == y) || (shapes[1].x == y && shapes[1].y == y)) 
+          //       // dy = -dy;
+          //       dx = -dx;      
+          //      console.log(dx+ ' '+dy+ '  ==  '+shapes[0].x+ ''+ shapes[0].y)
+          // }
+      ball.y += ball.dy
+      ball.x += ball.dx
+      ctx.fillStyle = ball.colour;
+      ctx.fillRect(ball.x, ball.y, ball.width, ball.height);    
   }
 
-  function moveHandler(press, player) {
-     
+  function drawPaddle(paddle) {
+        ctx.fillStyle = paddle.colour;
+        ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+  }
 
-     if(press.key=='x' || press.code == 'keyX'){// && player is not at top of canvas
-        player.top+= 5
+
+  function moveHandler(press, player) {
+     if(press.key=='x' || press.code == 'keyX'){// && player is not at y of canvas
+        player.y+= 20
          // console.log(press.key +'  '+JSON.stringify(player))
         // console.log(player+' pressed x')
      }
      if(press.key=='s' || press.code == 'keyS'){
-        player.top-= 5
+        player.y-= 20 
         // console.log(press.key +'  '+JSON.stringify(player))
         // console.log(player+' pressed s')
    
      }
-     if(player.top<=-5){
-        player.top = -5
+     if(player.y < 0){
+        player.y = 0
      } 
-     if(player.top>=100){
-        player.top = 100
+     if(player.y + player.height > board.height){
+        player.y = board.height - player.height
      }
-     draw(shapes)
-     sendMove({id:gameData.id, movement: player.top})
+     sendMove({id:gameData.id, movement: player.y})
      // get press.key and player
      // check what key was pressed
      // if w or s
@@ -146,16 +175,17 @@ function gameRoutine(board, gameData) {
 
   }
 
+
+
   function sendMove(data) { 
     socket.emit('sendMove', data)
   }
 
   socket.on('getMove', function (opponent) {
-    console.log(opponent)
     if (gameData.playerOneId == socket.id) {
-      shapes[1].top = opponent.movement
+      p2.y = opponent.movement
     }else{
-      shapes[0].top = opponent.movement
+      p1.y = opponent.movement
     }
     draw(shapes)
   })
