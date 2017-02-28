@@ -126,15 +126,24 @@ function gameRoutine(board, gameData) {
     // }
 
 
-  function drawBall() {    
+  function drawBall() {
+      console.log('ball: x'+ball.y + ' y'+ball.x)
+      console.log('p2.x:'+p2.x+' y: '+p2.y)    
+      let tolerance = 5
+
+      if(ball.x > board.width || ball.x < 0){
+        ball.x = board.width/2
+        ball.y = board.height/2
+      }
+
       if(ball.y > board.height || ball.y < 0){
         ball.dy = -ball.dy
       }
-          //   if((shapes[0].x == y && shapes[0].y == y) || (shapes[1].x == y && shapes[1].y == y)) 
-          //       // dy = -dy;
-          //       dx = -dx;      
-          //      console.log(dx+ ' '+dy+ '  ==  '+shapes[0].x+ ''+ shapes[0].y)
-          // }
+      if(p1.x == ball.x && p1.y == ball.y || p2.x == ball.x && p2.y == ball.y) {
+        // dy = -dy;
+        ball.dx = -ball.dx;      
+        console.log(ball.dx+ ' '+ball.dy)
+      }
       ball.y += ball.dy
       ball.x += ball.dx
       ctx.fillStyle = ball.colour;
