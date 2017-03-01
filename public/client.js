@@ -11,6 +11,7 @@ document.getElementById('joinServer').addEventListener('click', function() {
 
 socket.on('resJoinLobby', function (data) {
   let nameNode = document.createTextNode(data)
+  document.getElementsByClassName('title')[0].classList.add('hide')
   document.getElementById('userName').appendChild(nameNode)
 })
 
@@ -41,7 +42,9 @@ socket.on('message', function (message) {
 function log(message) {
   let li = document.createElement('LI')
   li.appendChild(document.createTextNode(message))
-  document.getElementById('gameMessages').appendChild(li)
+  let gameMessages = document.getElementById('gameMessages')
+  gameMessages.appendChild(li)
+  gameMessages.scrollTop = gameMessages.scrollHeight
 }
 
 socket.on('challenge', function (challenge) {
@@ -73,7 +76,8 @@ function startGame(data) {
   canvas.id = 'canvas'
   canvas.width = 600
   canvas.height = 300
-  
+
+  document.getElementById('gameList').remove() //remove from Dom?
   document.getElementById('lobby').appendChild(canvas);
   gameRoutine(canvas, data)
 
@@ -81,9 +85,13 @@ function startGame(data) {
 
 function gameRoutine(board, gameData) {
   // console.log('socket.game: '+JSON.stringify(socket.game))
-  let shapes = []
+  let scores = document.createElement('div')
+  scores.id = 'scores'
+  scores.innerHTML =  socket.game.playerOne+': 0'+socket.game.playerTwo+': 0'
+  document.getElementById('lobby').appendChild(scores)
   let ctx = board.getContext('2d')
  
+
   document.addEventListener('keydown', function(e){
         if (gameData.playerOneId == socket.id) {
              moveHandler(e, p1)
@@ -92,15 +100,11 @@ function gameRoutine(board, gameData) {
             moveHandler(e, p2)
         }
   }, false)
-  //Top: distance from top of canvas
-  // x: distance from x of canvas
-  // Height: Height in distcnce from Top
-  // Width: Width in distance from x
 
- let p1 = {colour:'#05EFFF',width: 10,height: 60, y: board.height/2, x: 10, dx: 0, dy: 0,name: 'P1 Rock'}
- let p2 = {colour: '#FFC300',width: 10,height: 60, y: board.height/2, x: board.width-20, dx: 0, dy: 0, name: 'P2 Paper'}
+ let p1 = {colour:'#05EFFF',width: 10,height: 60, y: board.height/2, x: 10, dx: 0, dy: 0,name: 'P1 Rock', score: 0}
+ let p2 = {colour: '#FFC300',width: 10,height: 60, y: board.height/2, x: board.width-20, dx: 0, dy: 0, name: 'P2', score: 0}
  let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 2, dy: -2, name: 'Ball'};
- setInterval(draw, 10)
+ let drawId = setInterval(draw, 10)
 // Render elements.
   function draw() {
     //redraw canvas first 
@@ -108,12 +112,35 @@ function gameRoutine(board, gameData) {
     drawBall()
     drawPaddle(p1)
     drawPaddle(p2)
+    checkWin()
+  }
+  function checkWin(){
+    if(p1.score<6 && p2.score<6){
+      return 
+    }
+    let winner
+    if (p1.score>5){
+      winner = socket.game.playerOne
+    } 
+    if(p2.score>5) {
+      winner = socket.game.playerTwo
+    }
+      clearInterval(drawId)
+      drawScore(winner+' WON THE GAME')
+      // ask if play again, if both say yes, run gameRountine, else return to lobby. 
   }
   function drawBall() {
-      console.log(p2)
       let diff = 5
 
-      if(ball.x > board.width || ball.x < 0){
+      if(ball.x > board.width){
+        p1.score++
+        drawScore()
+        ball.x = board.width/2
+        ball.y = board.height/2
+      }
+      if(ball.x < 0){
+        p2.score++
+        drawScore()
         ball.x = board.width/2
         ball.y = board.height/2
       }
@@ -128,13 +155,13 @@ function gameRoutine(board, gameData) {
         && ball.y+ball.height>p1.y 
         && ball.y<p1.y+p1.height){
         ball.dx = -ball.dx;
-        console.log('ball: x'+ball.y + ' y'+ball.x)
-        console.log('p2.x:'+p1.x+' y: '+p1.y) 
+        // console.log('ball: x'+ball.y + ' y'+ball.x)
+        // console.log('p2.x:'+p1.x+' y: '+p1.y) 
       }
 
       if(ball.x+ball.width/2 > p2.x && ball.x < p2.x+p2.width && ball.y+ball.height>p2.y && ball.y<p2.y+p2.height){
-        console.log('ball: x'+ball.y + ' y'+ball.x)
-        console.log('p2.x:'+p2.x+' y: '+p2.y)  
+        // console.log('ball: x'+ball.y + ' y'+ball.x)
+        // console.log('p2.x:'+p2.x+' y: '+p2.y)  
         ball.dx = -ball.dx     
        }
 
@@ -145,8 +172,17 @@ function gameRoutine(board, gameData) {
   }
 
   function drawPaddle(paddle) {
-        ctx.fillStyle = paddle.colour;
-        ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+    ctx.fillStyle = paddle.colour;
+    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+  }
+  function drawScore(text) {
+    let scoreStr
+    if(text){
+      scoreStr =  text
+    }else{
+      scoreStr = socket.game.playerOne+':' +p1.score +'  '+socket.game.playerTwo+':'+ p2.score
+    }
+    document.getElementById('scores').innerHTML = scoreStr
   }
 
 
@@ -190,7 +226,6 @@ function gameRoutine(board, gameData) {
     }else{
       p1.y = opponent.movement
     }
-    //draw(shapes)
   })
 
 }

@@ -39,6 +39,12 @@ ul, li {
   overflow-y: scroll;
   max-height: 100px;
 }
+#scores{
+  font-size: 40px;
+}
+.hide{
+  display: none;
+}
 canvas{
   background-color: #006994;
 }
