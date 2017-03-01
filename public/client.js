@@ -11,6 +11,7 @@ document.getElementById('joinServer').addEventListener('click', function() {
 
 socket.on('resJoinLobby', function (data) {
   let nameNode = document.createTextNode(data)
+  document.getElementsByClassName('title')[0].classList.add('hide')
   document.getElementById('userName').appendChild(nameNode)
 })
 
@@ -41,7 +42,9 @@ socket.on('message', function (message) {
 function log(message) {
   let li = document.createElement('LI')
   li.appendChild(document.createTextNode(message))
-  document.getElementById('gameMessages').appendChild(li)
+  let gameMessages = document.getElementById('gameMessages')
+  gameMessages.appendChild(li)
+  gameMessages.scrollTop = gameMessages.scrollHeight
 }
 
 socket.on('challenge', function (challenge) {
@@ -71,79 +74,176 @@ socket.on('startGame', function (data) {
 function startGame(data) {
   var canvas = document.createElement('canvas');
   canvas.id = 'canvas'
-  
+  canvas.width = 600
+  canvas.height = 300
+
+  document.getElementById('gameList').classList.add('hide') //remove from DOM/use hide class?
   document.getElementById('lobby').appendChild(canvas);
   gameRoutine(canvas, data)
 
 }
 
 function gameRoutine(board, gameData) {
-  // console.log('socket.game: '+JSON.stringify(socket.game))
-  let shapes = []
+  let scores = document.createElement('div')
+  scores.id = 'scores'
+  scores.innerHTML =  socket.game.playerOne+': 0'+socket.game.playerTwo+': 0'
+  document.getElementById('lobby').appendChild(scores)
   let ctx = board.getContext('2d')
-  let boardLeft = board.offsetLeft
-  let boardTop = board.offsetTop
+ 
 
   document.addEventListener('keydown', function(e){
-      shapes.forEach(function (shape) {
         if (gameData.playerOneId == socket.id) {
-             moveHandler(e, shapes[0])
+             moveHandler(e, p1)
         }
         if (gameData.playerTwoId == socket.id) {
-            moveHandler(e, shapes[1])
+            moveHandler(e, p2)
+          
         }
-      });
   }, false)
-  //Top: distance from top of canvas
-  // Left: distance from left of canvas
-  // Height: Height in distcnce from Top
-  // Width: Width in distance from Left
 
-  shapes.push({colour:'#05EFFF',width: 50,height: 50, top: 25, left: 25, name: 'P1 Rock'})
-  shapes.push({colour: '#FFC300',width: 50,height: 50, top: 25, left: 175, name: 'P2 Paper'})
-  shapes.push({colour: '#CEFF33',width: 5,height: 5, top: 75, left: 125, name: 'Ball'});
-  draw(shapes)
+ let p1 = {colour:'#05EFFF',width: 10,height: 60, y: board.height/2, x: 10, dx: 0, dy: 0,name: 'P1 Rock', score: 0}
+ let p2 = {colour: '#FFC300',width: 10,height: 60, y: board.height/2, x: board.width-20, dx: 0, dy: 0, name: 'P2', score: 0}
+ let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 8, dy: -8, name: 'Ball'};
 
+ let timerId = setInterval(draw, 100)
 // Render elements.
-  function draw(gameObjects) {
-    //redraw canvas first 
-    ctx.clearRect(0, 0, 800, 400)
-
-    gameObjects.forEach(function(element) {
-      ctx.fillStyle = element.colour;
-      ctx.fillRect(element.left, element.top, element.width, element.height);
-    });
+  let coordTimerId
+  if(socket.game.playerOneId == socket.id){
+    coordTimerId = setInterval(calcBallPos, 100)
   }
 
-  function moveHandler(press, player) {
-     
 
-     if(press.key=='x' || press.code == 'keyX'){// && player is not at top of canvas
-        player.top+= 5
+  function draw() {
+    //redraw canvas first 
+    ctx.clearRect(0, 0, 600, 300)
+    checkWin()
+    drawBall()
+    drawPaddle(p2)
+    drawPaddle(p1)
+  }
+  function checkWin(){
+    if(p1.score<6 && p2.score<6){
+      return 
+    }
+    let winner
+    if (p1.score>5){
+      winner = socket.game.playerOne
+    } 
+    if(p2.score>5) {
+      winner = socket.game.playerTwo
+    }
+    
+    socket.emit('endGame', {winText: winner+ '  WON THE GAME', game: socket.game.id})
+    clearInterval(timerId)  
+    if(coordTimerId){
+      clearInterval(coordTimerId)
+    }   
+      // ask if play again, if both say yes, run gameRountine, else return to lobby. 
+  }
+  socket.on('winner', function (data) {
+    drawScore(data.winText)
+  })
+
+  function calcBallPos() {
+      let resetBall 
+      if(ball.x > board.width){
+        p1.score++
+        drawScore()
+        // ball.x = board.width/2
+        // ball.y = board.height/2
+        resetBall = true
+        // console.log('ball: x'+ball.y + ' y'+ball.x)
+        // console.log('p2.x:'+p2.x+' y: '+p2.y)
+
+      }
+      if(ball.x < 0){
+        p2.score++
+        drawScore()
+        // ball.x = board.width/2
+        // ball.y = board.height/2
+        resetBall = true
+        // console.log('ball: x'+ball.y + ' y'+ball.x)
+        // console.log('p1.x:'+p1.x+' y: '+p1.y)
+      }
+
+      if(ball.y > board.height || ball.y < 0){
+        ball.dy = -ball.dy
+      }
+
+   
+      if(ball.x+ball.width/2 > p1.x  && 
+        ball.x < p1.x+p1.width&& 
+        ball.y+ball.height>p1.y&& 
+        ball.y<p1.y+p1.height){
+
+        ball.dx = -ball.dx;
+        // console.log('ball: x'+ball.y + ' y'+ball.x)
+        // console.log('p1HIT.x:'+p1.x+' y: '+p1.y) 
+      }
+
+      if(ball.x+ball.width/2 > p2.x && 
+        ball.x < p2.x+p2.width &&
+         ball.y+ball.height>p2.y && 
+         ball.y<p2.y+p2.height){
+
+        // console.log('ball: x'+ball.x + ' y'+ball.y)
+        // console.log('p2HIT.x:'+p2.x+' y: '+p2.y)  
+        ball.dx = -ball.dx     
+       }
+     // console.log('sendBall position')
+     socket.emit('sendBallPos', {dx: ball.dx, dy: ball.dy, game:socket.game.id, shouldReset: resetBall})
+  
+
+  }   
+  //when ball is scored, the ball.x and ball.y is not reset to halfway so getBallPos just continues... maybe include flag in sendBallpos/getBallPos?
+  socket.on('getBallPos', function (data) {
+      if(data.shouldReset == true){
+        ball.x = board.width/2
+        ball.y = board.height/2
+        resetBall = false
+      }else{
+      ball.y += data.dy
+      ball.x += data.dx
+    }
+      // console.log('GETTing BALL DATA',data)
+  })
+
+  function drawBall() {  
+      ctx.fillStyle = ball.colour;
+      ctx.fillRect(ball.x, ball.y, ball.width, ball.height);    
+  }
+
+  function drawPaddle(paddle) {
+    ctx.fillStyle = paddle.colour;
+    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+  }
+  function drawScore(text) {
+    let scoreStr
+    if(text){
+      scoreStr =  text
+    }else{
+      scoreStr = socket.game.playerOne+':' +p1.score +'  '+socket.game.playerTwo+':'+ p2.score
+    }
+    document.getElementById('scores').innerHTML = scoreStr
+  }
+
+
+  function moveHandler(press, player) {
+     if(press.key=='x' || press.code == 'keyX'){
+        player.y+= 20
          // console.log(press.key +'  '+JSON.stringify(player))
-        // console.log(player+' pressed x')
      }
      if(press.key=='s' || press.code == 'keyS'){
-        player.top-= 5
-        // console.log(press.key +'  '+JSON.stringify(player))
-        // console.log(player+' pressed s')
-   
+        player.y-= 20 
+        // console.log(press.key +'  '+JSON.stringify(player)) 
      }
-     if(player.top<=-5){
-        player.top = -5
+     if(player.y < 0){
+        player.y = 0
      } 
-     if(player.top>=100){
-        player.top = 100
+     if(player.y + player.height > board.height){
+        player.y = board.height - player.height
      }
-     draw(shapes)
-     sendMove({id:gameData.id, movement: player.top})
-     // get press.key and player
-     // check what key was pressed
-     // if w or s
-     //    change code of that player shape
-     //    redraw
-     //    send to server
-
+     sendMove({id:gameData.id, movement: player.y})
   }
 
   function sendMove(data) { 
@@ -151,13 +251,11 @@ function gameRoutine(board, gameData) {
   }
 
   socket.on('getMove', function (opponent) {
-    console.log(opponent)
     if (gameData.playerOneId == socket.id) {
-      shapes[1].top = opponent.movement
+      p2.y = opponent.movement
     }else{
-      shapes[0].top = opponent.movement
+      p1.y = opponent.movement
     }
-    draw(shapes)
   })
 
 }
