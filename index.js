@@ -81,9 +81,9 @@ io.sockets.on('connection', function(socket) {
 
   })
 
-   socket.on('sendBallPos', function (ball) {
-    console.log(ball);
-    io.in(ball.game).emit('getBallPos',ball);
+   socket.on('sendGameState', function (data) {
+    console.log(data);
+    io.in(data.game.id).emit('getGameState',data);
 
   })
    socket.on('endGame', function (data) {

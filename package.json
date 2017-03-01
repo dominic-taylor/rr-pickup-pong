@@ -1,7 +1,7 @@
 {
   "name": "glowing-train",
   "version": "1.0.0",
-  "description": "turn based multiplayer game over sockets",
+  "description": "live multiplayer game over sockets",
   "main": "index.js",
   "dependencies": {
     "browserify": "^14.1.0",
@@ -11,7 +11,6 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "browserify public/client.js -o public/bundle.js",
     "watch": "watchify public/client.js -o public/bundle.js -dv"  },
   "repository": {
