@@ -81,6 +81,15 @@ io.sockets.on('connection', function(socket) {
 
   })
 
+   socket.on('sendBallPos', function (ball) {
+    console.log(ball);
+    io.in(ball.game).emit('getBallPos',ball);
+
+  })
+   socket.on('endGame', function (data) {
+    io.in(data.game).emit('winner', data)   
+  })
+
   socket.on('disconnect', function() {
 			users = users.filter(function (el) {
         return el.id != socket.id
