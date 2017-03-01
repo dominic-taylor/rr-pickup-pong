@@ -59,6 +59,7 @@ function log(message) {
 }
 
 socket.on('challenge', function (challenge) {
+  console.log('got the challenge', challenge)
   let lobby = document.getElementById('lobby')
   let accept = document.createElement('button')
   accept.id = 'accept'
