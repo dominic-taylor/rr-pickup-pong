@@ -1,4 +1,5 @@
 const socket = io()
+let inLobby = false
 
 document.getElementById('joinServer').addEventListener('click', function() {
   let name = document.getElementById('nameInput')
@@ -6,6 +7,7 @@ document.getElementById('joinServer').addEventListener('click', function() {
     return log('Please enter a name')
   };
   socket.emit('joinLobby', name.value)
+  inLobby = true
   //disable further events from this button
 })
 
@@ -20,7 +22,8 @@ socket.on('resUsers', function (users) {
   gameList.innerHTML = ''
   let thisUser = document.getElementById('userName').innerHTML
   for (var i = 0; i < users.length; i++) {
-    if(users[i].name != thisUser){
+
+    if(users[i].name != thisUser && !users[i].inGame){
       var liNode = document.createElement("LI")
       var game = document.createTextNode(users[i].name)
       liNode.appendChild(game)
@@ -28,9 +31,17 @@ socket.on('resUsers', function (users) {
       gameList.appendChild(liNode)
     }
   }
+  let otherPlayers = gameList.hasChildNodes()
+  if(!otherPlayers){
+    gameList.innerHTML = 'Just you in the lobby right now'
+  }
 })
 
 function reqGame(e) {
+  if(!inLobby){
+    log('Please join the lobby to challenge players')
+    return 
+  }
   let player = e.target.innerHTML
   socket.emit('requestGame', player)
 }
@@ -48,6 +59,7 @@ function log(message) {
 }
 
 socket.on('challenge', function (challenge) {
+  console.log('got the challenge', challenge)
   let lobby = document.getElementById('lobby')
   let accept = document.createElement('button')
   accept.id = 'accept'
@@ -67,7 +79,7 @@ socket.on('startGame', function (data) {
     readyButton.parentNode.removeChild(readyButton);
   }
   socket.game = data
-  log('Game between '+data.playerOne+' and '+ data.playerTwo+'is on!' );
+  log(data.playerOne+' VS '+ data.playerTwo);
   startGame(data)
 })
 
@@ -76,7 +88,7 @@ function startGame(data) {
   canvas.id = 'canvas'
   canvas.width = 600
   canvas.height = 300
-
+  canvas.classList.add('in-game')
   document.getElementById('gameList').classList.add('hide') //remove from DOM/use hide class?
   document.getElementById('lobby').appendChild(canvas);
   gameRoutine(canvas, data)
@@ -86,10 +98,12 @@ function startGame(data) {
 function gameRoutine(board, gameData) {
   let scores = document.createElement('div')
   scores.id = 'scores'
+  scores.classList.add('in-game')
   scores.innerHTML =  socket.game.playerOne+': 0'+socket.game.playerTwo+': 0'
   document.getElementById('lobby').appendChild(scores)
   let ctx = board.getContext('2d')
- 
+  socket.game.p1Score = 0
+  socket.game.p2Score = 0 //++ each time a score happends. 
 
   document.addEventListener('keydown', function(e){
         if (gameData.playerOneId == socket.id) {
@@ -105,31 +119,32 @@ function gameRoutine(board, gameData) {
  let p2 = {colour: '#FFC300',width: 10,height: 60, y: board.height/2, x: board.width-20, dx: 0, dy: 0, name: 'P2', score: 0}
  let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 8, dy: -8, name: 'Ball'};
 
- let timerId = setInterval(draw, 100)
+ let timerId = setInterval(draw, 30)
 // Render elements.
   let coordTimerId
   if(socket.game.playerOneId == socket.id){
-    coordTimerId = setInterval(calcBallPos, 100)
+    coordTimerId = setInterval(calcBallPos, 30)
   }
 
 
   function draw() {
-    //redraw canvas first 
+    //redraw canvas first add middle line? 
     ctx.clearRect(0, 0, 600, 300)
     checkWin()
     drawBall()
+    drawScore()
     drawPaddle(p2)
     drawPaddle(p1)
   }
   function checkWin(){
-    if(p1.score<6 && p2.score<6){
+    if(socket.game.p1Score<6 && socket.game.p2Score<6){
       return 
     }
     let winner
-    if (p1.score>5){
+    if (socket.game.p1Score>5){
       winner = socket.game.playerOne
     } 
-    if(p2.score>5) {
+    if(socket.game.p2Score>5) {
       winner = socket.game.playerTwo
     }
     
@@ -137,18 +152,43 @@ function gameRoutine(board, gameData) {
     clearInterval(timerId)  
     if(coordTimerId){
       clearInterval(coordTimerId)
-    }   
+    }
+    setExitToLobby()
       // ask if play again, if both say yes, run gameRountine, else return to lobby. 
   }
   socket.on('winner', function (data) {
     drawScore(data.winText)
   })
 
+  function setExitToLobby() {
+    //delete socket.game? 
+    console.log(socket.game)
+    let gameOver = document.createElement('button')  
+    gameOver.classList.add('in-game')
+    gameOver.innerHTML = 'Exit to Lobby'
+    gameOver.addEventListener('click', function () {
+      // show gameList lobby : remove hide list
+      // remove canvas, scores and this button
+      // OR just reset page? 
+
+      // socket.game = {}
+      // document.getElementById('gameList').classList.remove('hide')
+      // let gameElements = document.getElementsByClassName('in-game')
+      // while(gameElements[0]){
+      //       gameElements[0].parentNode.removeChild(gameElements[0]);
+      // }
+      window.location.reload()
+      console.log(socket.game)
+    })
+    document.getElementById('lobby').appendChild(gameOver)
+  }
+
   function calcBallPos() {
       let resetBall 
       if(ball.x > board.width){
-        p1.score++
-        drawScore()
+        socket.game.p1Score++
+        // p1.score++
+        //drawScore()
         // ball.x = board.width/2
         // ball.y = board.height/2
         resetBall = true
@@ -157,8 +197,9 @@ function gameRoutine(board, gameData) {
 
       }
       if(ball.x < 0){
-        p2.score++
-        drawScore()
+        socket.game.p2Score++
+        // p2.score++
+        //drawScore()
         // ball.x = board.width/2
         // ball.y = board.height/2
         resetBall = true
@@ -191,12 +232,12 @@ function gameRoutine(board, gameData) {
         ball.dx = -ball.dx     
        }
      // console.log('sendBall position')
-     socket.emit('sendBallPos', {dx: ball.dx, dy: ball.dy, game:socket.game.id, shouldReset: resetBall})
-  
+     socket.emit('sendGameState', {dx: ball.dx, dy: ball.dy, game:socket.game, shouldReset: resetBall})
+   
 
   }   
   //when ball is scored, the ball.x and ball.y is not reset to halfway so getBallPos just continues... maybe include flag in sendBallpos/getBallPos?
-  socket.on('getBallPos', function (data) {
+  socket.on('getGameState', function (data) {
       if(data.shouldReset == true){
         ball.x = board.width/2
         ball.y = board.height/2
@@ -205,7 +246,10 @@ function gameRoutine(board, gameData) {
       ball.y += data.dy
       ball.x += data.dx
     }
-      // console.log('GETTing BALL DATA',data)
+    //update game state? 
+    socket.game = data.game
+    // drawthe score
+  // console.log('GETting game state',data)
   })
 
   function drawBall() {  
@@ -222,7 +266,7 @@ function gameRoutine(board, gameData) {
     if(text){
       scoreStr =  text
     }else{
-      scoreStr = socket.game.playerOne+':' +p1.score +'  '+socket.game.playerTwo+':'+ p2.score
+      scoreStr = socket.game.playerOne+':' +socket.game.p1Score +'  '+socket.game.playerTwo+':'+ socket.game.p2Score
     }
     document.getElementById('scores').innerHTML = scoreStr
   }

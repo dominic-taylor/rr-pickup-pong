@@ -31,27 +31,53 @@ io.sockets.on('connection', function(socket) {
 
   socket.on('joinLobby', function(name) {
     const userName = validate(name)
-    users.push({id: socket.id, name: userName})
+    users.push({id: socket.id, name: userName, inGame: false})
     socket.userName = userName
-    socket.emit('resJoinLobby', userName);
+    socket.emit('resJoinLobby',userName);
     io.emit('resUsers', users);
+    console.log(users)
   });
 
   socket.on('requestGame', function (otherPlayer) {
-
-    console.log('req fight with '+otherPlayer);
+    console.log('reqGame: ',users)
     let opponentId
+    let challengerIndex
     for (var i = 0; i < users.length; i++) {
-      if(users[i].name == otherPlayer){
-        opponentId = users[i].id
+      if(users[i].name == socket.userName){
+        if(users[i].inGame){
+          console.log('this user in game? ',users)
+          return socket.emit('message', 'You are already in a game')
+        }else{
+          console.log('challenger good to go', users[i])
+          challengerIndex = i
+          users[i].inGame = true
+        }
       }
     }
+
+    for (var i = 0; i < users.length; i++) {
+      if(users[i].name == otherPlayer){
+        if(users[i].inGame){
+          console.log('this user in game? ',users)
+          // change challengers inGame back to false 
+           users[challengerIndex].inGame = false;
+           return socket.emit('message', 'Sorry'+otherPlayer+' already in a game')
+      }else{
+          console.log('other player should be good to go', users[i])
+          opponentId = users[i].id
+          users[i].inGame = true
+        }
+      }
+    }
+    console.log('after the loops', users)
     let gameId = (Math.random() + 1).toString(36).slice(2, 18)
     socket.emit('message', 'Challenge sent to '+ otherPlayer)
     socket.join(gameId)
     let gamePacket = { host: otherPlayer,
                       challenger: socket.userName,
                       gameId: gameId}
+
+    console.log(gamePacket)                 
     socket.broadcast.to(opponentId).emit('challenge',gamePacket)
   })
 
@@ -81,9 +107,9 @@ io.sockets.on('connection', function(socket) {
 
   })
 
-   socket.on('sendBallPos', function (ball) {
-    console.log(ball);
-    io.in(ball.game).emit('getBallPos',ball);
+   socket.on('sendGameState', function (data) {
+    console.log(data);
+    io.in(data.game.id).emit('getGameState',data);
 
   })
    socket.on('endGame', function (data) {
