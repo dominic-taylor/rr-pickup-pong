@@ -8,7 +8,8 @@ body{
 margin: auto;
 text-align: center;
 font-family: 'Hind', sans-serif;
-}
+/*font-size: 15px;
+*/}
 ul, li {
   padding: 0px;
   list-style: none;
@@ -37,7 +38,7 @@ ul, li {
 }
 #gameMessages {
   overflow-y: scroll;
-  max-height: 100px;
+  max-height: 150px;
 }
 #scores{
   font-size: 40px;

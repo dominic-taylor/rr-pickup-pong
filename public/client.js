@@ -1,4 +1,5 @@
 const socket = io()
+let inLobby = false
 
 document.getElementById('joinServer').addEventListener('click', function() {
   let name = document.getElementById('nameInput')
@@ -6,6 +7,7 @@ document.getElementById('joinServer').addEventListener('click', function() {
     return log('Please enter a name')
   };
   socket.emit('joinLobby', name.value)
+  inLobby = true
   //disable further events from this button
 })
 
@@ -20,7 +22,8 @@ socket.on('resUsers', function (users) {
   gameList.innerHTML = ''
   let thisUser = document.getElementById('userName').innerHTML
   for (var i = 0; i < users.length; i++) {
-    if(users[i].name != thisUser){
+
+    if(users[i].name != thisUser && !users[i].inGame){
       var liNode = document.createElement("LI")
       var game = document.createTextNode(users[i].name)
       liNode.appendChild(game)
@@ -28,9 +31,17 @@ socket.on('resUsers', function (users) {
       gameList.appendChild(liNode)
     }
   }
+  let otherPlayers = gameList.hasChildNodes()
+  if(!otherPlayers){
+    gameList.innerHTML = 'Just you in the lobby right now'
+  }
 })
 
 function reqGame(e) {
+  if(!inLobby){
+    log('Please join the lobby to challenge players')
+    return 
+  }
   let player = e.target.innerHTML
   socket.emit('requestGame', player)
 }
@@ -76,7 +87,7 @@ function startGame(data) {
   canvas.id = 'canvas'
   canvas.width = 600
   canvas.height = 300
-
+  canvas.classList.add('in-game')
   document.getElementById('gameList').classList.add('hide') //remove from DOM/use hide class?
   document.getElementById('lobby').appendChild(canvas);
   gameRoutine(canvas, data)
@@ -86,6 +97,7 @@ function startGame(data) {
 function gameRoutine(board, gameData) {
   let scores = document.createElement('div')
   scores.id = 'scores'
+  scores.classList.add('in-game')
   scores.innerHTML =  socket.game.playerOne+': 0'+socket.game.playerTwo+': 0'
   document.getElementById('lobby').appendChild(scores)
   let ctx = board.getContext('2d')
@@ -139,12 +151,36 @@ function gameRoutine(board, gameData) {
     clearInterval(timerId)  
     if(coordTimerId){
       clearInterval(coordTimerId)
-    }   
+    }
+    setExitToLobby()
       // ask if play again, if both say yes, run gameRountine, else return to lobby. 
   }
   socket.on('winner', function (data) {
     drawScore(data.winText)
   })
+
+  function setExitToLobby() {
+    //delete socket.game? 
+    console.log(socket.game)
+    let gameOver = document.createElement('button')  
+    gameOver.classList.add('in-game')
+    gameOver.innerHTML = 'Exit to Lobby'
+    gameOver.addEventListener('click', function () {
+      // show gameList lobby : remove hide list
+      // remove canvas, scores and this button
+      // OR just reset page? 
+
+      // socket.game = {}
+      // document.getElementById('gameList').classList.remove('hide')
+      // let gameElements = document.getElementsByClassName('in-game')
+      // while(gameElements[0]){
+      //       gameElements[0].parentNode.removeChild(gameElements[0]);
+      // }
+      window.location.reload()
+      console.log(socket.game)
+    })
+    document.getElementById('lobby').appendChild(gameOver)
+  }
 
   function calcBallPos() {
       let resetBall 
@@ -212,7 +248,7 @@ function gameRoutine(board, gameData) {
     //update game state? 
     socket.game = data.game
     // drawthe score
-  console.log('GETting game state',data)
+  // console.log('GETting game state',data)
   })
 
   function drawBall() {  

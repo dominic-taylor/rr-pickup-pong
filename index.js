@@ -31,19 +31,27 @@ io.sockets.on('connection', function(socket) {
 
   socket.on('joinLobby', function(name) {
     const userName = validate(name)
-    users.push({id: socket.id, name: userName})
+    users.push({id: socket.id, name: userName, inGame: false})
     socket.userName = userName
     socket.emit('resJoinLobby', userName);
     io.emit('resUsers', users);
   });
 
   socket.on('requestGame', function (otherPlayer) {
-
     console.log('req fight with '+otherPlayer);
+
     let opponentId
     for (var i = 0; i < users.length; i++) {
-      if(users[i].name == otherPlayer){
+      if(users[i].name == otherPlayer && !users[i].inGame){
         opponentId = users[i].id
+        users[i].inGame = true  
+      }else{
+        // sorry they are in a game!
+      }
+      if(users[i].name == socket.userName && !users[i].inGame){
+        users[i].inGame = true
+      }else{
+        // already in a game
       }
     }
     let gameId = (Math.random() + 1).toString(36).slice(2, 18)
