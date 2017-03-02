@@ -5,7 +5,7 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const compression = require('compression')
 
-app.use(compress())
+app.use(compression())
 
 app.use(express.static(__dirname+'/public'));
 
