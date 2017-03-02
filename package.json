@@ -11,7 +11,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start:" "index.js"
+    "start:": "index.js",
     "build": "browserify public/client.js -o public/bundle.js",
     "watch": "watchify public/client.js -o public/bundle.js -dv"  },
   "repository": {
