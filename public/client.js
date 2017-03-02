@@ -117,14 +117,14 @@ function gameRoutine(board, gameData) {
 
  let p1 = {colour:'#05EFFF',width: 10,height: 60, y: board.height/2, x: 10, dx: 0, dy: 0,name: 'P1 Rock', score: 0}
  let p2 = {colour: '#FFC300',width: 10,height: 60, y: board.height/2, x: board.width-20, dx: 0, dy: 0, name: 'P2', score: 0}
- let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 1, dy: -1, name: 'Ball'};
+ let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 2, dy: -2, name: 'Ball'};
 
  let timerId = setInterval(draw, 100)
 // Render elements.
   let coordTimerId
   if(socket.game.playerOneId == socket.id){
     console.log('ball', ball)
-    coordTimerId = setInterval(calcBallPos, 100)
+    coordTimerId = setInterval(calcBallPos, 50)
   }
 
 
