@@ -123,6 +123,7 @@ function gameRoutine(board, gameData) {
 // Render elements.
   let coordTimerId
   if(socket.game.playerOneId == socket.id){
+    console.log('ball', ball)
     coordTimerId = setInterval(calcBallPos, 30)
   }
 
@@ -201,12 +202,9 @@ function gameRoutine(board, gameData) {
         ball.x < p2.x+p2.width &&
          ball.y+ball.height>p2.y && 
          ball.y<p2.y+p2.height){
-
-        // console.log('ball: x'+ball.x + ' y'+ball.y)
-        // console.log('p2HIT.x:'+p2.x+' y: '+p2.y)  
-        ball.dx = -ball.dx     
+         ball.dx = -ball.dx     
        }
-     // console.log('sendBall position')
+     console.log('sendGameState', ball.dx+'  '+ball.dy)
      socket.emit('sendGameState', {dx: ball.dx, dy: ball.dy, game:socket.game, shouldReset: resetBall})
    
 

@@ -69,15 +69,12 @@ io.sockets.on('connection', function(socket) {
         }
       }
     }
-    console.log('after the loops', users)
     let gameId = (Math.random() + 1).toString(36).slice(2, 18)
     socket.emit('message', 'Challenge sent to '+ otherPlayer)
     socket.join(gameId)
     let gamePacket = { host: otherPlayer,
                       challenger: socket.userName,
                       gameId: gameId}
-
-    console.log(gamePacket)                 
     socket.broadcast.to(opponentId).emit('challenge',gamePacket)
   })
 
@@ -108,7 +105,7 @@ io.sockets.on('connection', function(socket) {
   })
 
    socket.on('sendGameState', function (data) {
-    console.log(data);
+    console.log('gameState: ',data);
     io.in(data.game.id).emit('getGameState',data);
 
   })
