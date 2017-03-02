@@ -117,7 +117,7 @@ function gameRoutine(board, gameData) {
 
  let p1 = {colour:'#05EFFF',width: 10,height: 60, y: board.height/2, x: 10, dx: 0, dy: 0,name: 'P1 Rock', score: 0}
  let p2 = {colour: '#FFC300',width: 10,height: 60, y: board.height/2, x: board.width-20, dx: 0, dy: 0, name: 'P2', score: 0}
- let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 8, dy: -8, name: 'Ball'};
+ let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 4, dy: -4, name: 'Ball'};
 
  let timerId = setInterval(draw, 30)
 // Render elements.
@@ -167,16 +167,6 @@ function gameRoutine(board, gameData) {
     gameOver.classList.add('in-game')
     gameOver.innerHTML = 'Exit to Lobby'
     gameOver.addEventListener('click', function () {
-      // show gameList lobby : remove hide list
-      // remove canvas, scores and this button
-      // OR just reset page? 
-
-      // socket.game = {}
-      // document.getElementById('gameList').classList.remove('hide')
-      // let gameElements = document.getElementsByClassName('in-game')
-      // while(gameElements[0]){
-      //       gameElements[0].parentNode.removeChild(gameElements[0]);
-      // }
       window.location.reload()
       console.log(socket.game)
     })
@@ -187,24 +177,11 @@ function gameRoutine(board, gameData) {
       let resetBall 
       if(ball.x > board.width){
         socket.game.p1Score++
-        // p1.score++
-        //drawScore()
-        // ball.x = board.width/2
-        // ball.y = board.height/2
         resetBall = true
-        // console.log('ball: x'+ball.y + ' y'+ball.x)
-        // console.log('p2.x:'+p2.x+' y: '+p2.y)
-
       }
       if(ball.x < 0){
         socket.game.p2Score++
-        // p2.score++
-        //drawScore()
-        // ball.x = board.width/2
-        // ball.y = board.height/2
         resetBall = true
-        // console.log('ball: x'+ball.y + ' y'+ball.x)
-        // console.log('p1.x:'+p1.x+' y: '+p1.y)
       }
 
       if(ball.y > board.height || ball.y < 0){
@@ -218,8 +195,6 @@ function gameRoutine(board, gameData) {
         ball.y<p1.y+p1.height){
 
         ball.dx = -ball.dx;
-        // console.log('ball: x'+ball.y + ' y'+ball.x)
-        // console.log('p1HIT.x:'+p1.x+' y: '+p1.y) 
       }
 
       if(ball.x+ball.width/2 > p2.x && 
