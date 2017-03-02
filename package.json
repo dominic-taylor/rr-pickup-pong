@@ -5,6 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "browserify": "^14.1.0",
+    "compression": "^1.6.2",
     "express": "^4.14.1",
     "socket.io": "^1.7.2",
     "watchify": "^3.9.0"
@@ -13,7 +14,8 @@
   "scripts": {
     "start:": "node server.js",
     "build": "browserify public/client.js -o public/bundle.js",
-    "watch": "watchify public/client.js -o public/bundle.js -dv"  },
+    "watch": "watchify public/client.js -o public/bundle.js -dv"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dominic-taylor/glowing-train.git"

@@ -3,12 +3,15 @@ const express = require('express');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+const compression = require('compression')
 
+app.use(compress())
 
 app.use(express.static(__dirname+'/public'));
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/public/index.html');
+  res.flush();
 });
 
 let users = []
