@@ -119,12 +119,12 @@ function gameRoutine(board, gameData) {
  let p2 = {colour: '#FFC300',width: 10,height: 60, y: board.height/2, x: board.width-20, dx: 0, dy: 0, name: 'P2', score: 0}
  let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 2, dy: -2, name: 'Ball'};
 
- let timerId = setInterval(draw, 100)
+ let timerId = setInterval(draw, 30)
 // Render elements.
   let coordTimerId
   if(socket.game.playerOneId == socket.id){
     console.log('ball', ball)
-    coordTimerId = setInterval(calcBallPos, 50)
+    coordTimerId = setInterval(calcBallPos, 30)
   }
 
 
@@ -176,14 +176,6 @@ function gameRoutine(board, gameData) {
 
   function calcBallPos() {
       let resetBall 
-      if(ball.x > board.width){
-        socket.game.p1Score++
-        resetBall = true
-      }
-      if(ball.x < 0){
-        socket.game.p2Score++
-        resetBall = true
-      }
 
       if(ball.y > board.height || ball.y < 0){
         ball.dy = -ball.dy
@@ -204,6 +196,14 @@ function gameRoutine(board, gameData) {
          ball.y<p2.y+p2.height){
          ball.dx = -ball.dx     
        }
+      if(ball.x > board.width){
+        socket.game.p1Score++
+        resetBall = true
+      }
+      if(ball.x < 0){
+        socket.game.p2Score++
+        resetBall = true
+      }
      console.log('sendGameState', ball.dx+'  '+ball.dy)
      socket.emit('sendGameState', {dx: ball.dx, dy: ball.dy, game:socket.game, shouldReset: resetBall})
    
