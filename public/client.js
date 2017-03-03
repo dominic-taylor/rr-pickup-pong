@@ -254,13 +254,12 @@ function gameRoutine(board, gameData) {
 
 
   function moveHandler(press, player) {
-     if(press.key=='x' || press.code == 'keyX'){
-        player.y+= 20
+     if(press.key=='w' || press.code == 'keyW'){
+        player.y-= 20
          // console.log(press.key +'  '+JSON.stringify(player))
      }
      if(press.key=='s' || press.code == 'keyS'){
-        player.y-= 20 
-        // console.log(press.key +'  '+JSON.stringify(player)) 
+        player.y+= 20 
      }
      if(player.y < 0){
         player.y = 0

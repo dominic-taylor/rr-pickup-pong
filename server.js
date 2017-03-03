@@ -159,15 +159,12 @@ function nextGameState(data) {
          ball.dx = -ball.dx     
        }
       if(ball.x > width){
-        //socket.game.p1Score++
-        // ball.x = width/2
-        // ball.y = height/2
-        ball.dx = -ball.dx
+        ball.x = width/2
+        ball.y = height/2
       }
       if(ball.x < 0){
-        // ball.x = width/2
-        // ball.y = height/2
-        ball.dx = -ball.dx
+        ball.x = width/2
+        ball.y = height/2
         
       }
 
