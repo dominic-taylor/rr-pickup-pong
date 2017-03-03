@@ -96,6 +96,7 @@ function startGame(data) {
 }
 
 function gameRoutine(board, gameData) {
+  let gameId = socket.game.id
   let scores = document.createElement('div')
   scores.id = 'scores'
   scores.classList.add('in-game')
@@ -117,15 +118,15 @@ function gameRoutine(board, gameData) {
 
  let p1 = {colour:'#05EFFF',width: 10,height: 60, y: board.height/2, x: 10, dx: 0, dy: 0,name: 'P1 Rock', score: 0}
  let p2 = {colour: '#FFC300',width: 10,height: 60, y: board.height/2, x: board.width-20, dx: 0, dy: 0, name: 'P2', score: 0}
- let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 2, dy: -2, name: 'Ball'};
+ let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 3, dy: -5, name: 'Ball'};
 
  let timerId = setInterval(draw, 30)
 // Render elements.
   let coordTimerId
-  if(socket.game.playerOneId == socket.id){
-    console.log('ball', ball)
+  // if(socket.game.playerOneId == socket.id){
+  //   console.log('ball', ball)
     coordTimerId = setInterval(calcBallPos, 30)
-  }
+  // }
 
 
   function draw() {
@@ -198,29 +199,36 @@ function gameRoutine(board, gameData) {
        }
       if(ball.x > board.width){
         socket.game.p1Score++
-        resetBall = true
-      }
-      if(ball.x < 0){
-        socket.game.p2Score++
-        resetBall = true
-      }
-     console.log('sendGameState', ball.dx+'  '+ball.dy)
-     socket.emit('sendGameState', {dx: ball.dx, dy: ball.dy, game:socket.game, shouldReset: resetBall})
-   
-
-  }   
-  //when ball is scored, the ball.x and ball.y is not reset to halfway so getBallPos just continues... maybe include flag in sendBallpos/getBallPos?
-  socket.on('getGameState', function (data) {
-      if(data.shouldReset == true){
         ball.x = board.width/2
         ball.y = board.height/2
-        resetBall = false
-      }else{
-      ball.y += data.dy
-      ball.x += data.dx
-    }
+      }
+      if(ball.x < 0){
+        socket.game.p1Score++
+        ball.x = board.width/2
+        ball.y = board.height/2
+      }
+
+      ball.x+=ball.dx
+      ball.y+=ball.dy
+     console.log('ballX y DX dy',ball.x+'  '+ball.y+'   '+ball.dx+'  '+ball.dy)
+     // socket.emit('sendGameState', {dx: ball.dx, dy: ball.dy, game:socket.game})
+    
+    /// shortened version   dx, dy, p1, p2
+    //socket.emit('sendGameState', {ball:ball, p1: p1, p2: p2, id: gameId})
+
+
+  }   
+   socket.on('getGameState', function (data) {
+    console.log('getingServerGameState', data)
+
+      // ball.x = data.x
+      // ball.y = data.y
+  
+      // ball.y += data.dy
+      // ball.x += data.dx
+    
     //update game state? 
-    socket.game = data.game
+   // socket.game = data.game
     // drawthe score
   // console.log('GETting game state',data)
   })
