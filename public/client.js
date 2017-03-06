@@ -99,11 +99,15 @@ function gameRoutine(board, gameData) {
   let scores = document.createElement('div')
   scores.id = 'scores'
   scores.classList.add('in-game')
-  scores.innerHTML =  socket.game.playerOne+': 0'+socket.game.playerTwo+': 0'
+ 
   document.getElementById('lobby').appendChild(scores)
+
   let ctx = board.getContext('2d')
+  ctx.font = '30px Arial'
   socket.game.p1Score = 0
   socket.game.p2Score = 0 //++ each time a score happends. 
+
+
 
   document.addEventListener('keydown', function(e){
         if (gameData.playerOneId == socket.id) {
@@ -117,7 +121,7 @@ function gameRoutine(board, gameData) {
 
  let p1 = {colour:'#05EFFF',width: 10,height: 60, y: board.height/2, x: 10, dx: 0, dy: 0,name: 'P1', score: 0}
  let p2 = {colour: '#FFC300',width: 10,height: 60, y: board.height/2, x: board.width-20, dx: 0, dy: 0, name: 'P2', score: 0}
- let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 3, dy: -5, name: 'Ball'};
+ let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 5, dy: -5, name: 'Ball'};
 
  let timerId = setInterval(draw, 30)
 // Render elements.
@@ -131,6 +135,8 @@ function gameRoutine(board, gameData) {
   function draw() {
     //redraw canvas first add middle line? 
     ctx.clearRect(0, 0, 600, 300)
+    ctx.fillStyle = "#FFFFFF"
+    ctx.fillRect(board.width/2, 0, 2, board.height)
     checkWin()
     drawBall()
     drawScore()
@@ -180,7 +186,7 @@ function gameRoutine(board, gameData) {
       }
 
    
-      if(ball.x+ball.width/2 > p1.x  && 
+      if(ball.x+ball.width > p1.x  && 
         ball.x < p1.x+p1.width&& 
         ball.y+ball.height>p1.y&& 
         ball.y<p1.y+p1.height){
@@ -200,7 +206,7 @@ function gameRoutine(board, gameData) {
         ball.y = board.height/2
       }
       if(ball.x < 0){
-        socket.game.p1Score++
+        socket.game.p2Score++
         ball.x = board.width/2
         ball.y = board.height/2
       }
@@ -215,8 +221,11 @@ function gameRoutine(board, gameData) {
    })
 
   function drawBall() {  
-      ctx.fillStyle = ball.colour;
-      ctx.fillRect(ball.x, ball.y, ball.width, ball.height);    
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.width, 0, Math.PI*2);
+    ctx.fillStyle = ball.colour;
+    ctx.fill();
+    ctx.closePath();
   }
 
   function drawPaddle(paddle) {
@@ -224,13 +233,13 @@ function gameRoutine(board, gameData) {
     ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
   }
   function drawScore(text) {
-    let scoreStr
     if(text){
-      scoreStr =  text
-    }else{
-      scoreStr = socket.game.playerOne+':' +socket.game.p1Score +'  '+socket.game.playerTwo+':'+ socket.game.p2Score
+      document.getElementById('scores').innerHTML = text
     }
-    document.getElementById('scores').innerHTML = scoreStr
+ 
+    ctx.fillStyle = "#FFFFFF"
+    ctx.fillText(socket.game.p1Score, board.width/4, 28);
+    ctx.fillText(socket.game.p2Score, board.width*3/4, 28);
   }
 
 
@@ -247,11 +256,7 @@ function gameRoutine(board, gameData) {
      if(player.y + player.height > board.height){
         player.y = board.height - player.height
      }
-     sendMove({id:gameData.id, movement: player.y})
-  }
-
-  function sendMove(data) { 
-    socket.emit('sendMove', data)
+     socket.emit('sendMove', {id:gameData.id, movement: player.y})
   }
 
   socket.on('getMove', function (opponent) {

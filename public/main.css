@@ -1,15 +1,12 @@
 * {
-	/*margin: 0;
-	padding: 0;*/
 	box-sizing: border-box;
 }
 
 body{
 margin: auto;
 text-align: center;
-font-family: 'Hind', sans-serif;
-/*font-size: 15px;
-*/}
+font-family: 'Comfortaa', cursive;
+}
 ul, li {
   padding: 0px;
   list-style: none;
@@ -41,7 +38,7 @@ ul, li {
   max-height: 150px;
 }
 #scores{
-  font-size: 40px;
+  font-size: 30px;
 }
 .hide{
   display: none;
@@ -62,6 +59,7 @@ button {
   font-family: Arial;
   color: #ffffff;
   font-size: 20px;
+  margin: 5px;
   padding: 10px 20px 10px 20px;
   text-decoration: none;
 }
