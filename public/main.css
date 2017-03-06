@@ -2,7 +2,6 @@
 	box-sizing: border-box;
   margin: 
 }
-
 body{
 margin: auto;
 text-align: center;
@@ -27,8 +26,7 @@ ul, li {
 }
 #gameList{
   border-top: 1px solid gray;
-  padding: 10px;
-  
+  padding: 10px;  
 }
 #gameList li {
 	border-bottom: 1px solid gray;
