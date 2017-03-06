@@ -88,7 +88,7 @@ io.sockets.on('connection', function(socket) {
     game.playerOneId = socket.id
     game.playerTwo = data.challenger
     game.p1Score = 0
-    game.p2Score = 0 // will p2 have this tho?
+    game.p2Score = 0 
 
     for (var i = 0; i < users.length; i++) {
       if(users[i].name == data.challenger){

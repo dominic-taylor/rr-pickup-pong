@@ -8,7 +8,6 @@ document.getElementById('joinServer').addEventListener('click', function() {
   };
   socket.emit('joinLobby', name.value)
   inLobby = true
-  //disable further events from this button
 })
 
 socket.on('resJoinLobby', function (data) {
@@ -116,7 +115,7 @@ function gameRoutine(board, gameData) {
         }
   }, false)
 
- let p1 = {colour:'#05EFFF',width: 10,height: 60, y: board.height/2, x: 10, dx: 0, dy: 0,name: 'P1 Rock', score: 0}
+ let p1 = {colour:'#05EFFF',width: 10,height: 60, y: board.height/2, x: 10, dx: 0, dy: 0,name: 'P1', score: 0}
  let p2 = {colour: '#FFC300',width: 10,height: 60, y: board.height/2, x: board.width-20, dx: 0, dy: 0, name: 'P2', score: 0}
  let ball = {colour: '#CEFF33',width: 10,height: 10, y: board.height/2, x: board.width/2, dx: 3, dy: -5, name: 'Ball'};
 
@@ -163,8 +162,6 @@ function gameRoutine(board, gameData) {
   })
 
   function setExitToLobby() {
-    //delete socket.game? 
-    console.log(socket.game)
     let gameOver = document.createElement('button')  
     gameOver.classList.add('in-game')
     gameOver.innerHTML = 'Exit to Lobby'
@@ -211,27 +208,11 @@ function gameRoutine(board, gameData) {
       ball.x+=ball.dx
       ball.y+=ball.dy
      console.log('ballX y DX dy',ball.x+'  '+ball.y+'   '+ball.dx+'  '+ball.dy)
-     // socket.emit('sendGameState', {dx: ball.dx, dy: ball.dy, game:socket.game})
-    
-    /// shortened version   dx, dy, p1, p2
-    //socket.emit('sendGameState', {ball:ball, p1: p1, p2: p2, id: gameId})
-
-
   }   
    socket.on('getGameState', function (data) {
     console.log('getingServerGameState', data)
-
-      // ball.x = data.x
-      // ball.y = data.y
-  
-      // ball.y += data.dy
-      // ball.x += data.dx
-    
-    //update game state? 
-   // socket.game = data.game
-    // drawthe score
-  // console.log('GETting game state',data)
-  })
+    // check if ball positions are too far out of sync and if so reset ball.
+   })
 
   function drawBall() {  
       ctx.fillStyle = ball.colour;
@@ -256,7 +237,6 @@ function gameRoutine(board, gameData) {
   function moveHandler(press, player) {
      if(press.key=='w' || press.code == 'keyW'){
         player.y-= 20
-         // console.log(press.key +'  '+JSON.stringify(player))
      }
      if(press.key=='s' || press.code == 'keyS'){
         player.y+= 20 
