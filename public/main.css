@@ -1,5 +1,6 @@
 * {
 	box-sizing: border-box;
+  margin: 
 }
 
 body{
@@ -26,19 +27,19 @@ ul, li {
 }
 #gameList{
   border-top: 1px solid gray;
-  padding: 0;
+  padding: 10px;
   
 }
 #gameList li {
 	border-bottom: 1px solid gray;
-  padding: 15px;
+  padding: 10px;
 }
 #gameMessages {
   overflow-y: scroll;
   max-height: 150px;
 }
 #scores{
-  font-size: 30px;
+  font-size: 20px;
 }
 .hide{
   display: none;
