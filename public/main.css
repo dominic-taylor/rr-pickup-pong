@@ -32,6 +32,10 @@ ul, li {
 	border-bottom: 1px solid gray;
   padding: 10px;
 }
+#gameList li:hover {
+  background-color: #04bfcc;
+  color: #FFFFFF;
+}
 #gameMessages {
   overflow-y: scroll;
   max-height: 150px;
