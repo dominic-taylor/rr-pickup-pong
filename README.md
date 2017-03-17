@@ -1,2 +1,2 @@
 # glowing-train
-realtime multiplayer game over sockets w/ react+redux
+multiplayer pong over sockets w/ react+redux
